@@ -1,3 +1,6 @@
+;;Initial board
+;; '(1 1 1 0 0 0 0 0 0 2 2 2)
+
 ;; (define findMoves
 ;;   (lambda (board, moveList, visited)
 ;;     (
@@ -8,6 +11,28 @@
 ;;   )
 
 
+
+
+;;Get all positions of white knights in the board that are not in their final pos
+;;if the knight is already in final position (i.e 0, 1, 2), that position is not returned
+(define getWhitePositions
+  (lambda (board)
+    (removeFinalPositions (findKnights isWhite board 0) blackInitialPos)
+  ))
+
+;;Get all positions of black knight in the board
+;;if the knight is already in final position (i.e 9, 10, 11), that position is not returned
+(define getBlackPositions
+  (lambda (board)
+    (removeFinalPositions (findKnights isBlack board 0) whiteInitialPos)
+  ))
+
+;;return all the positions filled by the knights in the board
+(define getFilledPositions
+  (lambda (board)
+    (findKnights (lambda(x) (or (isBlack x) (isWhite x))) board 0)
+    )
+  )
 
 ;;get the target position to which a knight could move
 ;;the target position should not be where a knight already exists in the board
@@ -60,7 +85,17 @@
       (if (and (>= r 0) (<= r 3) (>= c 0) (<= c 2))
        (+ (* r 3) c) -1)
       )))
-  
+
+
+;; From the given list of positions remove the source positions
+;; For example, a black knight need not move to 0,1,2
+;; and a white knight need not move to 9, 10, 11
+;; knightPredicate = blackInitialPos or whiteInitialPos
+(define removeInitialPositions
+  (lambda (positions knightPredicate)
+    (delete-matching-items positions knightPredicate)
+  ))
+
 ;; From the given list of positions remove the positions at which the knight is already at
 ;; its final position
 ;; eg. a Black knight at 10 , 11, 12 need not be moved
@@ -79,14 +114,14 @@
      )
   ))
 
-;;black is swapped if its position is >=9 (i.e. 9, 10, 11)
-(define blackSwapped
+;;initial position of white knights >=9 (i.e. 9, 10, 11)
+(define whiteInitialPos
   (lambda (position)
     (>= position 9)
     ))
 
-;;white is swapped if its position is <=2 (i.e. 0, 1, 2)
-(define whiteSwapped
+;;initial position of black knights <=2 (i.e. 0, 1, 2)
+(define blackInitialPos
   (lambda (position)
     (<= position 2)
     ))

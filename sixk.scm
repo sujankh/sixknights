@@ -17,14 +17,14 @@
 ;;if the knight is already in final position (i.e 0, 1, 2), that position is not returned
 (define getWhitePositions
   (lambda (board)
-    (removeFinalPositions (findKnights isWhite board 0) blackInitialPos)
+    (filterPositions (findKnights isWhite board 0) blackInitialPos)
   ))
 
 ;;Get all positions of black knight in the board
 ;;if the knight is already in final position (i.e 9, 10, 11), that position is not returned
 (define getBlackPositions
   (lambda (board)
-    (removeFinalPositions (findKnights isBlack board 0) whiteInitialPos)
+    (filterPositions (findKnights isBlack board 0) whiteInitialPos)
   ))
 
 ;;return all the positions filled by the knights in the board
@@ -33,6 +33,30 @@
     (findKnights (lambda(x) (or (isBlack x) (isWhite x))) board 0)
     )
   )
+
+;; get all the moves to which a black knight can go
+;; a black knight does not return back to its initial positions (0, 1, 2)
+(define getBlackMoves
+  (lambda (index filledPositions)
+    (filterPositions (getValidTargetPositions index filledPositions) blackInitialPos)    
+    )
+  )
+
+;; get all the moves to which a black knight can go
+;; a black knight does not return back to its initial positions (0, 1, 2)
+(define getBlackMoves
+  (lambda (index filledPositions)
+    (filterPositions (getValidTargetPositions index filledPositions) blackInitialPos)    
+    )
+  )
+
+;;a white does not move back to 10, 11, 12
+(define getWhiteMoves
+  (lambda (index filledPositions)
+    (filterPositions (getValidTargetPositions index filledPositions) whiteInitialPos)    
+    )
+  )
+
 
 ;;get the target position to which a knight could move
 ;;the target position should not be where a knight already exists in the board
@@ -87,13 +111,10 @@
       )))
 
 
-;; From the given list of positions remove the source positions
-;; For example, a black knight need not move to 0,1,2
-;; and a white knight need not move to 9, 10, 11
-;; knightPredicate = blackInitialPos or whiteInitialPos
-(define removeInitialPositions
-  (lambda (positions knightPredicate)
-    (delete-matching-items positions knightPredicate)
+;; From the given list of positions remove the positions that return true with predicate
+(define filterPositions
+  (lambda (positions predicate)
+    (delete-matching-items positions predicate)
   ))
 
 ;; From the given list of positions remove the positions at which the knight is already at
@@ -101,18 +122,18 @@
 ;; eg. a Black knight at 10 , 11, 12 need not be moved
 ;; a white knight at 1, 2, 3 need not be moved
 ;; predicate is a lambda which is used to decide if a knight is in its final position or not
-(define removeFinalPositions
-  (lambda (positions predicate)
-    (cond
-     ((null? positions) '())
-     ((predicate (car positions))
-      (append '() (removeFinalPositions (cdr positions) predicate)))
-     (else
-      (append
-       (list (car positions)) (removeFinalPositions (cdr positions) predicate))
-      )      
-     )
-  ))
+;; (define removeFinalPositions
+;;   (lambda (positions predicate)
+;;     (cond
+;;      ((null? positions) '())
+;;      ((predicate (car positions))
+;;       (append '() (removeFinalPositions (cdr positions) predicate)))
+;;      (else
+;;       (append
+;;        (list (car positions)) (removeFinalPositions (cdr positions) predicate))
+;;       )      
+;;      )
+;;   ))
 
 ;;initial position of white knights >=9 (i.e. 9, 10, 11)
 (define whiteInitialPos

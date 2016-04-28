@@ -1,16 +1,89 @@
 ;;Initial board
 ;; '(1 1 1 0 0 0 0 0 0 2 2 2)
+;;(findMoves (list (cons '(2 2 2 0 0 0 0 0 0 1 1 1) '(()))))
 
-;; (define findMoves
-;;   (lambda (board, moveList, visited)
-;;     (
-;;      (let (blackKnights (findKnights 1 Board 0 '()))
-;; 	 )
-;;     )
-;;    )
-;;   )
+;;queue is a list of cons cells
+;;each cons cell: [board . moves that made this board]
+(define findMoves
+  (lambda (queue)
+    (let ((board (caar queue)) (moveList (cdar queue)))
+      (cond
+       ((equal? board '(2 2 2 0 0 0 0 0 0 1 1 1)) moveList) ;;final state
+       (else
+	(let (
+	      (newQueue (cdr queue)) ;;additions will be done to this queue
+	      (knightPositions (getFilledPositions board))	      
+	      )
+	  ;;explore child states
+	  ;;add them to the queue
+	  ;;recurse
+	  (findMoves (append newQueue (explorenewstates board knightPositions moveList)))
+	  )
+       ))
+	)
+    ))
 
+;;finds the child states of the given board and adds it to the queue
+(define explorenewstates
+  (lambda (board knightPositions moveList)
+    (let ( (blackKnights (getBlackPositions board))
+	   (whiteKnights (getWhitePositions board))
+	   )
+      ;;get the new states by moving black and white knights
+      ;;append them and return
+      (append
+       (moveKnight 1 (lambda (x) (getBlackMoves x knightPositions)) blackKnights board moveList)
+       (moveKnight 2 (lambda (x) (getWhiteMoves x knightPositions)) whiteKnights board moveList)
+      )      
+      )
+    ))
 
+;;movingFunction = getBlackMoves or getWhiteMoves
+(define moveKnight
+  (lambda (knight movingFunction fromPositions board moveList)
+    (let (
+	  ;;finalPositions is a list of (list of positions to which knight can move for each from)
+	  (finalPositions (map movingFunction fromPositions))	  
+	  )      
+       (map
+	(lambda (from toList) (getNewBoardNodes knight board from toList moveList))
+	fromPositions finalPositions)
+      
+  )))
+
+;;returns a list of child boards along with the moves that created the board
+;;input: from and toList
+
+(define getNewBoardNodes
+  (lambda (knight board from toList moveList)  ;;(5 (6 9)) from 5, 6 and 9 can be reached
+    (map (lambda (to) (getUpdatedBoardNode knight board from to moveList)) toList)
+  ))
+
+;;creates a cons cell [NewBoard . Moves till now]
+;;appends the new move to the existing move list
+(define getUpdatedBoardNode
+  (lambda (knight board from to moveList)
+   (cons (updateBoard  knight board from to) (append moveList (cons from to)))
+  )
+  )
+    
+;; update the board so that knight at from moves to position 'to'
+;; invariant..to = 0 (i.e. destination should be empty)
+(define updateBoard
+  (lambda (knight board from to)
+;;    (list-set! board from 0) ;;remove the knight from pos = from
+;;    (list-set! board to knight) ;;put the knight at pos = to
+    ;;    board
+    (setList (setList board from 0 0 '()) to knight 0 '())
+  ))
+
+(define setList
+  (lambda (lst index value i modified)
+    (cond
+     ((null? lst) lst)
+     ((eq? index i) (append modified (list value) (cdr lst))) ;;replace element at index by value
+     ((setList (cdr lst) index value (+ i 1) (append modified (list (car lst)))))
+  ))))
 
 
 ;;Get all positions of white knights in the board that are not in their final pos
@@ -31,14 +104,6 @@
 (define getFilledPositions
   (lambda (board)
     (findKnights (lambda(x) (or (isBlack x) (isWhite x))) board 0)
-    )
-  )
-
-;; get all the moves to which a black knight can go
-;; a black knight does not return back to its initial positions (0, 1, 2)
-(define getBlackMoves
-  (lambda (index filledPositions)
-    (filterPositions (getValidTargetPositions index filledPositions) blackInitialPos)    
     )
   )
 

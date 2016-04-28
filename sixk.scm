@@ -9,7 +9,8 @@
   (lambda (queue)
     (let ((board (caar queue)) (moveList (cdar queue)))
       (cond
-       ((equal? board '(2 2 2 0 0 0 0 0 0 1 1 1)) moveList) ;;final state
+       ;;((equal? board '(2 2 2 0 0 0 0 0 0 1 1 1)) moveList) ;;final state
+       ((equal? board '(1 0 1 0 0 0 1 0 0 2 2 2)) moveList) ;;final state
        (else
 	(let (
 	      (newQueue (cdr queue)) ;;additions will be done to this queue
@@ -18,8 +19,10 @@
 	  ;;explore child states
 	  ;;add them to the queue
 	  ;;recurse
-	  (findMoves (append newQueue (explorenewstates board knightPositions moveList)))
-	  )
+	  ;;(display board) (newline)
+	  (if (eq? (length board) 12)
+	      (findMoves (append newQueue (explorenewstates board knightPositions moveList)))
+	  ))
        ))
 	)
     ))
@@ -43,9 +46,9 @@
 (define moveKnight
   (lambda (knight movingFunction fromPositions board moveList)
     (let (
-	  ;;finalPositions is a list of (list of positions to which knight can move for each from)
+	  ;;finalPositions is a list of list of positions to which knight can move for each from
 	  (finalPositions (map movingFunction fromPositions))	  
-	  )      
+	  )
        (map
 	(lambda (from toList) (getNewBoardNodes knight board from toList moveList))
 	fromPositions finalPositions)
@@ -81,7 +84,7 @@
      ((null? lst) lst)
      ((eq? index i) (append modified (list value) (cdr lst))) ;;replace element at index by value
      ((setList (cdr lst) index value (+ i 1) (append modified (list (car lst)))))
-  ))))
+  )))
 
 
 ;;Get all positions of white knights in the board that are not in their final pos

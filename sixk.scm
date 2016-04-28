@@ -64,7 +64,7 @@
 ;;appends the new move to the existing move list
 (define getUpdatedBoardNode
   (lambda (knight board from to moveList)
-   (cons (updateBoard  knight board from to) (append moveList (cons from to)))
+   (cons (updateBoard  knight board from to) (cons moveList (cons from to)))
   )
   )
     

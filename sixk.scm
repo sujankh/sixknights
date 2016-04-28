@@ -238,3 +238,17 @@
        (append '() (findKnights isKnight (cdr Board) (+ index 1))))
       )    
   ))
+
+
+(define flatten
+  (lambda (lst f)
+    (cond
+     ((null? lst) f)
+     (else
+      (let ((cur (car lst)))
+	(let ((len (length cur)))
+	  (if (> len 1)
+	      (append f (flatten cur '()) (flatten (cdr lst) '()))
+	      (flatten (cdr lst) (append f cur))
+	      )
+	  ))))))

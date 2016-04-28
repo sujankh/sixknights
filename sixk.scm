@@ -1,9 +1,10 @@
 ;;Initial board
 ;; '(1 1 1 0 0 0 0 0 0 2 2 2)
 ;;(findMoves (list (cons '(2 2 2 0 0 0 0 0 0 1 1 1) '(()))))
-
+;;(findMoves (list (cons '(1 1 1 0 0 0 0 0 0 2 2 2) '(()))))
 ;;queue is a list of cons cells
 ;;each cons cell: [board . moves that made this board]
+
 (define findMoves
   (lambda (queue)
     (let ((board (caar queue)) (moveList (cdar queue)))
@@ -23,7 +24,7 @@
 	)
     ))
 
-;;finds the child states of the given board and adds it to the queue
+;;finds the child states of the given board and adsds it to the queue
 (define explorenewstates
   (lambda (board knightPositions moveList)
     (let ( (blackKnights (getBlackPositions board))
@@ -32,8 +33,8 @@
       ;;get the new states by moving black and white knights
       ;;append them and return
       (append
-       (moveKnight 1 (lambda (x) (getBlackMoves x knightPositions)) blackKnights board moveList)
-       (moveKnight 2 (lambda (x) (getWhiteMoves x knightPositions)) whiteKnights board moveList)
+       (flatten (moveKnight 1 (lambda (x) (getBlackMoves x knightPositions)) blackKnights board moveList) '())
+       (flatten (moveKnight 2 (lambda (x) (getWhiteMoves x knightPositions)) whiteKnights board moveList) '())
       )      
       )
     ))
@@ -71,9 +72,6 @@
 ;; invariant..to = 0 (i.e. destination should be empty)
 (define updateBoard
   (lambda (knight board from to)
-;;    (list-set! board from 0) ;;remove the knight from pos = from
-;;    (list-set! board to knight) ;;put the knight at pos = to
-    ;;    board
     (setList (setList board from 0 0 '()) to knight 0 '())
   ))
 
@@ -246,9 +244,12 @@
      ((null? lst) f)
      (else
       (let ((cur (car lst)))
-	(let ((len (length cur)))
+	(cond
+	 ((not (list? cur)) (flatten (cdr lst) (append f (list cur))))
+	 (else
+	  (let ((len (length cur)))
 	  (if (> len 1)
 	      (append f (flatten cur '()) (flatten (cdr lst) '()))
 	      (flatten (cdr lst) (append f cur))
-	      )
-	  ))))))
+	      ))))
+	)))))

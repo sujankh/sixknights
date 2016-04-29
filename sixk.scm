@@ -181,11 +181,9 @@
 
 ;;a position is invalid if
 ;;another knight has already filled the position
-;;or as per our heuristic position = 4 or 7
-;;we don't want our knights to jump to 4 or 7
 (define isInvalidPosition
   (lambda (pos filledPositions)
-    (or (eq? pos 4) (eq? pos 7) (member pos filledPositions))
+    (member pos filledPositions)
   ))
 
 ;;returns all valid positions to which a knight could move

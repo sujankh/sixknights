@@ -1,16 +1,23 @@
 ;;Initial board
 ;; '(1 1 1 0 0 0 0 0 0 2 2 2)
 ;;(findMoves (list (cons '(2 2 2 0 0 0 0 0 0 1 1 1) '(()))))
-;;(findMoves (list (cons '(1 1 1 0 0 0 0 0 0 2 2 2) '(()))))
+;;(findMoves 
 ;;queue is a list of cons cells
 ;;each cons cell: [board . moves that made this board]
 
+(load-option 'hash-table)
+
+(define solve
+  (lambda ()
+    (findMoves (list (cons '(1 1 1 0 0 0 0 0 0 2 2 2) '())) (make-equal-hash-table))
+  ))
+
 (define findMoves
-  (lambda (queue)
+  (lambda (queue visited)
     (let ((board (caar queue)) (moveList (cdar queue)))
       (cond
-       ;;((equal? board '(2 2 2 0 0 0 0 0 0 1 1 1)) moveList) ;;final state
-       ((equal? board '(1 0 1 0 0 0 1 0 0 2 2 2)) moveList) ;;final state
+       ((equal? board '(2 2 2 0 0 0 0 0 0 1 1 1)) moveList) ;;final state
+       ;;((equal? board '(1 0 1 0 0 0 1 0 0 2 2 2)) moveList) ;;final state
        (else
 	(let (
 	      (newQueue (cdr queue)) ;;additions will be done to this queue
@@ -21,11 +28,51 @@
 	  ;;recurse
 	  ;;(display board) (newline)
 	  (if (eq? (length board) 12)
-	      (findMoves (append newQueue (explorenewstates board knightPositions moveList)))
+	      (let ((newstates (getunvisitedstates (explorenewstates board knightPositions moveList) visited)))
+		
+		 (updatehash! visited newstates) ;;add the new states to visited list
+		 ;;(findMoves (append newQueue (explorenewstates board knightPositions moveList)) visited))
+		 (findMoves (append newQueue newstates) visited)
+		 )
+		 
 	  ))
        ))
 	)
     ))
+
+
+
+;;only return the states that are not in the visited list
+;;add the new states to the visited list
+(define getunvisitedstates
+  (lambda (states visited)
+    (keep-matching-items states (lambda (item)
+				  (let ((board (getboard item)))
+				    (hash-table/get visited board #t)
+				  )  
+				  ))
+  ))
+
+(define updatehash!
+  (lambda (x items)
+    (for-each (lambda (i) (addtohash! x (getboard i))) items)
+  ))
+
+;;add an item to a hash x
+(define addtohash!
+  (lambda (x item)
+    (hash-table/put! x item #f)
+    )
+  )
+
+
+;;board is the first time in the 
+(define getboard
+  (lambda (state)
+    (car state)
+    )
+  )
+
 
 ;;finds the child states of the given board and adsds it to the queue
 (define explorenewstates
